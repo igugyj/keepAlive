@@ -1,0 +1,15 @@
+[project]
+name = "keepalive"
+version = "0.1.0"
+description = "Mail-based keep-alive system that updates a remote repo"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "python-dotenv>=1.2.4",
+    "requests>=2.34.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

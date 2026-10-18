@@ -1,0 +1,55 @@
+name: alive-bot
+
+on:
+  schedule:
+    - cron: "0 8 * * 1" # 每周一 08:00 UTC，改这里就是改运行间隔
+  workflow_dispatch:
+
+permissions:
+  contents: write # 允许提交 state.json
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      MAX_SENT_IDS: ${{ vars.MAX_SENT_IDS }}
+      MAX_PROCESSED_UIDS: ${{ vars.MAX_PROCESSED_UIDS }}
+      CONTROL_EMAIL: ${{ secrets.CONTROL_EMAIL }}
+      CONTROL_PASS: ${{ secrets.CONTROL_PASS }}
+      IMAP_HOST: ${{ vars.IMAP_HOST }}
+      IMAP_PORT: ${{ vars.IMAP_PORT }}
+      SMTP_HOST: ${{ vars.SMTP_HOST }}
+      SMTP_PORT: ${{ vars.SMTP_PORT }}
+      WHITELIST_EMAILS: ${{ secrets.WHITELIST_EMAILS }}
+      REMOTE_REPO: ${{ vars.REMOTE_REPO }}
+      REMOTE_FILE: ${{ vars.REMOTE_FILE }}
+      REMOTE_BRANCH: ${{ vars.REMOTE_BRANCH }}
+      REMOTE_TOKEN: ${{ secrets.REMOTE_TOKEN }}
+      DRY_RUN: "false"
+      MAIL_DRY: "false"
+      LOG_LEVEL: INFO
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Run business logic
+        run: uv run python src/main.py
+
+      - name: Commit state
+        run: |
+          git config user.name "alive-bot"
+          git config user.email "alive-bot@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet || git commit -m "update state"
+          git push
