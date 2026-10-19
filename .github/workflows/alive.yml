@@ -2,7 +2,7 @@ name: alive-bot
 
 on:
   schedule:
-    - cron: "0 8 * * 1" # 每周一 08:00 UTC，改这里就是改运行间隔
+    - cron: "32 10 * * 3"      # 每周三 10:32 UTC，即北京时间周三 18:32
   workflow_dispatch:
 
 permissions:
