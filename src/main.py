@@ -18,6 +18,7 @@ from utils import (
     mask_email,
     new_cycle_id,
     now_utc,
+    parse_iso,
 )
 
 logging.basicConfig(
@@ -29,14 +30,25 @@ log = logging.getLogger("main")
 
 # ===== 区块：动态区模板 =====
 CALLOUT_ALIVE = "> [!NOTE]\n> Active · {desc}"
-CALLOUT_TIMEOUT = "> [!WARNING]\n> Inactive · {desc}"
+CALLOUT_TIMEOUT = "> [!WARNING]\n> Inactive · {desc}\n> Last confirmed: {last_date}"
+CALLOUT_TIMEOUT_NO_DATE = "> [!WARNING]\n> Inactive · {desc}"
+DATE_FORMAT = "%Y-%m-%d"
 # ===== 区块结束 =====
 
 
-def build_block_text(status: str, desc: str) -> str:
+def build_block_text(status: str, desc: str, last_date: str | None = None) -> str:
     """只生成标记之间的 callout 内容，标记行本身不在这里。"""
-    template = CALLOUT_ALIVE if status == "ALIVE" else CALLOUT_TIMEOUT
-    return template.format(desc=desc)
+    if status == "ALIVE":
+        return CALLOUT_ALIVE.format(desc=desc)
+    if last_date:
+        return CALLOUT_TIMEOUT.format(desc=desc, last_date=last_date)
+    return CALLOUT_TIMEOUT_NO_DATE.format(desc=desc)
+
+
+def _format_last_date(iso: str | None) -> str | None:
+    """把 last_alive_at 转成 YYYY-MM-DD，解析失败返回 None。"""
+    dt = parse_iso(iso)
+    return dt.strftime(DATE_FORMAT) if dt else None
 
 
 def main() -> int:
@@ -92,7 +104,10 @@ def main() -> int:
     else:
         weeks = calc_silent_weeks(state.get("last_alive_at"))
         state["silent_weeks"] = weeks
-        block_text = build_block_text(status="TIMEOUT", desc=describe_active(weeks))
+        last_date = _format_last_date(state.get("last_alive_at"))
+        block_text = build_block_text(
+            status="TIMEOUT", desc=describe_active(weeks), last_date=last_date
+        )
         log.info("No reply hit, silent for %d week(s)", weeks)
 
     try:
