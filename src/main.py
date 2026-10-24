@@ -30,7 +30,7 @@ log = logging.getLogger("main")
 
 # ===== 区块：动态区模板 =====
 CALLOUT_ALIVE = "> [!NOTE]\n> Active · {desc}"
-CALLOUT_TIMEOUT = "> [!WARNING]\n> Inactive · {desc}\n> Last confirmed: {last_date}"
+CALLOUT_TIMEOUT = "> [!WARNING]\n> Inactive · {desc}\n>\n> Last confirmed: {last_date}"
 CALLOUT_TIMEOUT_NO_DATE = "> [!WARNING]\n> Inactive · {desc}"
 DATE_FORMAT = "%Y-%m-%d"
 # ===== 区块结束 =====
