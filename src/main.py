@@ -70,6 +70,14 @@ def main() -> int:
         sent_ids = send_ping(cycle_id)
     except Exception as e:
         log.error("Failed to send ping: %s", e)
+        if "535" in str(e):
+            log.error(
+                "SMTP 535 = auth rejected. For Gmail this usually means the "
+                "login password was used instead of an app password. Enable "
+                "2FA, then generate one at https://myaccount.google.com/"
+                "apppasswords and put it in CONTROL_PASS (IMAP must also be "
+                "enabled in Gmail settings)."
+            )
         return 1
     state["sent_message_ids"].extend(sent_ids)
     state["last_ping_at"] = now_utc().isoformat()

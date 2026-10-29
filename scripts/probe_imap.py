@@ -6,6 +6,9 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
+# Windows 控制台默认 GBK，主题里的 emoji/Unicode 会炸，降级为替换字符
+sys.stdout.reconfigure(errors="replace")
+
 import email  # noqa: E402
 import imaplib  # noqa: E402
 from email.header import decode_header  # noqa: E402

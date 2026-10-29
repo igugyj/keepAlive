@@ -13,7 +13,7 @@ from utils import mask_email
 @pytest.mark.parametrize(
     "raw,expected",
     [
-        ("alice@163.com", "a***@163.com"),
+        ("alice@gmail.com", "a***@gmail.com"),
         ("123456@qq.com", "1***@qq.com"),
         ("a@b.com", "a***@b.com"),
         ("", "***"),

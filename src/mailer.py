@@ -28,6 +28,15 @@ LOG_SENT = "Sent ping to %s"
 # ===== 区块结束 =====
 
 
+def _open_smtp():
+    """465 用隐式 TLS（Gmail smtp.gmail.com），587 用 STARTTLS。"""
+    if SMTP_PORT == 465:
+        return smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT)
+    smtp = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+    smtp.starttls()
+    return smtp
+
+
 def send_ping(cycle_id: str) -> list[str]:
     """向白名单每个地址各发一封询问邮件，返回发出的 Message-ID 列表。"""
     subject = SUBJECT_TEMPLATE.format(cycle_id=cycle_id)
@@ -51,7 +60,7 @@ def send_ping(cycle_id: str) -> list[str]:
             sent_ids.append(msg_id)
             continue
 
-        with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as smtp:
+        with _open_smtp() as smtp:
             smtp.login(CONTROL_EMAIL, CONTROL_PASS)
             smtp.send_message(msg)
         log.info(LOG_SENT, mask_email(recipient))

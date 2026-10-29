@@ -37,9 +37,9 @@ LOG_LEVEL: str = _env("LOG_LEVEL", "INFO")
 # ===== 区块：控制邮箱 =====
 CONTROL_EMAIL: str = _env("CONTROL_EMAIL", required=True)
 CONTROL_PASS: str = _env("CONTROL_PASS", required=True)
-IMAP_HOST: str = _env("IMAP_HOST", "imap.163.com")
+IMAP_HOST: str = _env("IMAP_HOST", "imap.gmail.com")
 IMAP_PORT: int = _env_int("IMAP_PORT", 993)
-SMTP_HOST: str = _env("SMTP_HOST", "smtp.163.com")
+SMTP_HOST: str = _env("SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT: int = _env_int("SMTP_PORT", 465)
 
 # ===== 区块：白名单 =====

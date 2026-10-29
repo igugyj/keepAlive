@@ -14,7 +14,7 @@ from utils import now_utc, parse_iso
 
 log = logging.getLogger(__name__)
 
-# 部分邮箱（如 163）要求客户端先发 ID 声明，否则 FETCH 会被拒绝
+# 部分邮箱服务要求客户端先发 ID 声明，否则 FETCH 会被拒绝；失败可忽略
 imaplib.Commands["ID"] = ("NONAUTH", "AUTH", "SELECTED")
 
 

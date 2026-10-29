@@ -18,9 +18,11 @@ GitHub Actions（每周一次）
         |-- 6. 裁剪并保存 state.json
 ```
 
-- **一个控制邮箱**负责发信和查信。
+- **一个 Gmail 控制邮箱**负责发信和查信，收发同一账号。
 - **白名单邮箱**中任意一个回信即可，回信统一落到控制邮箱收件箱，内容不限。
 - **目标文件**只改 `<!-- alive_start -->` 与 `<!-- alive_end -->` 之间的内容，标记之外不动。
+
+本项目只针对 Gmail 个人账户设计（应用密码认证），其他邮箱服务商未做适配；如需 Outlook、自建邮箱等方案，请自行 fork 改造。
 
 ## 目标文件效果
 
@@ -82,6 +84,16 @@ keepAlive/
 
 ## 配置
 
+### 获取 Gmail 应用密码
+
+Gmail 个人账户不能用登录密码做 SMTP/IMAP 认证，必须生成应用密码，且前提是账户已开启两步验证（2FA）。
+
+1. 访问 <https://myaccount.google.com/security>，登录并确认已开启"两步验证"。
+2. 访问 <https://myaccount.google.com/apppasswords>。
+3. 输入名称（如 `keepAlive`）并创建，复制显示的 16 位密码，它就是填入 `CONTROL_PASS` 的值（只显示一次）。
+
+同时确认 IMAP 已开启：Gmail 网页版 → 设置 → 查看所有设置 → 转发和 POP/IMAP → **启用 IMAP**（默认是关闭的，不启用则收信直接失败）。
+
 ### 本地 `.env`
 
 从 `.env.example` 复制一份：
@@ -94,10 +106,10 @@ cp .env.example .env
 
 | 变量                                      | 说明                                                       |
 | ----------------------------------------- | ---------------------------------------------------------- |
-| `CONTROL_EMAIL`                           | 控制邮箱地址，负责发信和查信                               |
-| `CONTROL_PASS`                            | 控制邮箱的应用专用密码，不是登录密码                       |
-| `IMAP_HOST` / `IMAP_PORT`                 | 例如 `imap.163.com` / `993`                                |
-| `SMTP_HOST` / `SMTP_PORT`                 | 例如 `smtp.163.com` / `465`                                |
+| `CONTROL_EMAIL`                           | 控制邮箱地址，负责收信和发信                                 |
+| `CONTROL_PASS`                            | 控制邮箱的应用密码（16 位），不是登录密码                 |
+| `IMAP_HOST` / `IMAP_PORT`                 | 默认 `imap.gmail.com` / `993`                                |
+| `SMTP_HOST` / `SMTP_PORT`                 | 默认 `smtp.gmail.com` / `465`（隐式 TLS）                    |
 | `WHITELIST_EMAILS`                        | 逗号分隔，回信发件人在此列表内即命中                       |
 | `REMOTE_REPO`                             | 目标仓库，格式 `owner/repo`                                |
 | `REMOTE_FILE`                             | 目标文件，例如 `README.md`                                 |
@@ -120,7 +132,7 @@ cp .env.example .env
 | 名称               | 说明                                     |
 | ------------------ | ---------------------------------------- |
 | `CONTROL_EMAIL`    | 控制邮箱地址                             |
-| `CONTROL_PASS`     | 应用专用密码                             |
+| `CONTROL_PASS`     | 应用密码（16 位）                     |
 | `REMOTE_TOKEN`     | 目标仓库 PAT                             |
 | `WHITELIST_EMAILS` | 白名单含真实邮箱，属个人信息，放 Secrets |
 
@@ -142,7 +154,7 @@ cp .env.example .env
 
 ### 日志脱敏
 
-日志中的邮箱地址经 `mask_email` 处理，只显示首字符和域名，例如 `k***@163.com`。Message-ID 不写入日志，排查去重问题时查看 `state.json` 中的 `sent_message_ids` 与 `processed_uids`。
+日志中的邮箱地址经 `mask_email` 处理，只显示首字符和域名，例如 `k***@gmail.com`。Message-ID 不写入日志，排查去重问题时查看 `state.json` 中的 `sent_message_ids` 与 `processed_uids`。
 
 ## 本地运行
 
@@ -218,9 +230,9 @@ cron 在 GitHub 上可能延迟数分钟到数十分钟，对每周频率没有�
 
 ## 常见问题
 
-**IMAP 登录失败**
+**IMAP/SMTP 登录失败（535）**
 
-确认邮箱已开启 IMAP 服务，并使用应用专用密码而非登录密码。163 邮箱需要在设置中手动开启 IMAP/SMTP。
+Gmail 不能用登录密码做 SMTP/IMAP 认证，必须用应用密码（见上文「获取 Gmail 应用密码」）。若报 `Basic authentication is disabled`，先检查 Gmail 设置里 IMAP 是否已启用。
 
 **目标仓库写入失败**
 
